@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login Activity - Nexgen Budgets</title>
+    <link rel="stylesheet" href="/static/css/dashboard.css">
+</head>
+<body>
+    <div class="sidebar">
+        <div class="brand-box">
+            <img alt="Nexgen Budgets Logo" class="logo" src="/static/images/logo.jpg">
+        </div>
+        <div class="menu">
+            <div class="menu-item active"><a href="{{ url_for('dashboard') }}"><img src="/static/icon/home.png" alt="Dashboard"> Dashboard</a></div>
+            <div class="menu-item"><a href="#"><img src="/static/icon/expense.png" alt="View Expenses"> View Expenses</a></div>
+            <div class="menu-item"><a href="#"><img src="/static/icon/fetch.png" alt="Fetch Statements"> Fetch Statements</a></div>
+            <div class="menu-item"><a href="#"><img src="/static/icon/summary.png" alt="Summary"> Summary</a></div>
+            <div class="menu-item"><a href="#"><img src="/static/icon/report.png" alt="Report & Analysis"> Report & Analysis</a></div>
+            <div class="menu-item"><a href="#"><img src="/static/icon/quotation.png" alt="Quotation"> Quotation</a></div>
+            <div class="menu-item"><a href="{{ url_for('login_activity') }}"><img src="/static/icon/Login_activity.png" alt="Login Activity"> Login Activity</a></div>
+        </div>
+        <div class="menu-item">
+           <a href="{{ url_for('logout') }}" class="logout-btn">
+                <img src="/static/icon/logout.png" alt="Logout"> Logout
+            </a>
+        </div>
+    </div>
+    <div class="content">
+        <div class="top-bar">
+            <div><a href="{{ url_for('dashboard') }}" class="home-link"><img src="/static/icon/home.png" alt="Home" class="home-icon"> Home</a></div>
+            <div class="search-bar">
+                <input type="text" placeholder="Search">
+            </div>
+            <div class="user-info">
+                <a href="#" class="settings-icon"><img src="/static/icon/settings.png" alt="Settings"></a> | <a href="#" class="settings-icon"><img src="/static/icon/user.png" alt="User Profile"> User Profile</a>
+            </div>
+        </div>
+        
+        <div class="main-section">
+            <h2>Login Activity</h2>
+            <p>View your recent login attempts and manage security settings</p>
+            
+            <div class="dashboard-card">
+                <div class="alert alert-info">
+                    Your account security is important! Review your login history regularly and report any suspicious activity.
+                </div>
+                
+                <div class="filter-options">
+                    <label for="activity-filter">Filter by:</label>
+                    <select id="activity-filter">
+                        <option value="all" {% if current_filter == 'all' %}selected{% endif %}>All Activity</option>
+                        <option value="success" {% if current_filter == 'success' %}selected{% endif %}>Successful Logins</option>
+                        <option value="failed" {% if current_filter == 'failed' %}selected{% endif %}>Failed Attempts</option>
+                    </select>
+                </div>
+                
+                <div class="login-history-full">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Time</th>
+                                <th>Status</th>
+                                <th>IP Address</th>
+                                <th>Device</th>
+                                <th>Location</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for attempt in login_history %}
+                            <tr class="{{ attempt.status }}">
+                                <td>{{ attempt.attempt_time }}</td>
+                                <td>
+                                    {% if attempt.status == 'success' %}
+                                    <span class="status-badge success">✓ Success</span>
+                                    {% else %}
+                                    <span class="status-badge failed">✗ Failed</span>
+                                    {% endif %}
+                                </td>
+                                <td>{{ attempt.ip_address }}</td>
+                                <td>{{ attempt.device|default('Unknown') }}</td>
+                                <td>{{ attempt.location|default('Unknown') }}</td>
+                            </tr>
+                            {% endfor %}
+                            {% if not login_history %}
+                            <tr>
+                                <td colspan="5" style="text-align: center; padding: 30px;">No login activity found matching your filter criteria.</td>
+                            </tr>
+                            {% endif %}
+                        </tbody>
+                    </table>
+                    
+                    <div class="pagination">
+                        {% if current_page > 1 %}
+                        <a href="{{ url_for('login_activity', page=current_page-1, filter=current_filter) }}" class="page-link">&laquo; Previous</a>
+                        {% else %}
+                        <span class="page-link disabled">&laquo; Previous</span>
+                        {% endif %}
+                        
+                        <span class="current-page">Page {{ current_page }} of {{ total_pages if total_pages > 0 else 1 }}</span>
+                        
+                        {% if current_page < total_pages %}
+                        <a href="{{ url_for('login_activity', page=current_page+1, filter=current_filter) }}" class="page-link">Next &raquo;</a>
+                        {% else %}
+                        <span class="page-link disabled">Next &raquo;</span>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            
+            <div class="dashboard-card" style="margin-top: 25px;">
+                <h3>Security Recommendations</h3>
+                <p>Based on your login activity, here are some security tips:</p>
+                
+                <ul style="margin-left: 20px; margin-bottom: 20px; line-height: 1.6;">
+                    <li>Enable two-factor authentication for additional security</li>
+                    <li>Update your password regularly (last changed: 45 days ago)</li>
+                    <li>Check for unusual login locations or devices</li>
+                    <li>Log out from all sessions when using shared computers</li>
+                </ul>
+                
+                <a href="#" class="button" style="background: linear-gradient(90deg, #3498db 0%, #2ecc71 100%); width: fit-content;">
+                    Update Security Settings
+                </a>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        // JavaScript to handle dynamic filtering via the URL
+        document.getElementById('activity-filter').addEventListener('change', function() {
+            const filter = this.value;
+            window.location.href = "{{ url_for('login_activity') }}?filter=" + filter;
+        });
+    </script>
+</body>
+</html>
+

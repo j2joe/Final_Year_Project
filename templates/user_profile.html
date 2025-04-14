@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Profile - Nexgen Budgets</title>
+    <link rel="stylesheet" href="/static/css/dashboard.css">
+</head>
+<body>
+    <div class="sidebar">
+        <div class="brand-box">
+            <img alt="Nexgen Budgets Logo" class="logo" src="/static/images/logo.jpg">
+        </div>
+        <div class="menu">
+            <div class="menu-item">
+                <a href="{{ url_for('dashboard') }}">
+                    <img src="/static/icon/home.png" alt="Dashboard"> Dashboard
+                </a>
+            </div>
+            <div class="menu-item active">
+                <a href="{{ url_for('user_profile') }}">
+                    <img src="/static/icon/user.png" alt="User Profile"> My Profile
+                </a>
+            </div>
+            <!-- Other menu items same as dashboard.html -->
+        </div>
+        <div class="menu-item">
+            <a href="{{ url_for('logout') }}" class="logout-btn">
+                <img src="/static/icon/logout.png" alt="Logout"> Logout
+            </a>
+        </div>
+    </div>
+    <div class="content">
+        <div class="top-bar">
+            <div>
+                <a href="{{ url_for('dashboard') }}" class="home-link">
+                    <img src="/static/icon/home.png" alt="Home" class="home-icon"> Dashboard
+                </a>
+            </div>
+            <div class="search-bar">
+                <input type="text" placeholder="Search profile...">
+            </div>
+            <div class="user-info">
+                <span style="color: white;">Welcome, {{ user.full_name }}</span>
+            </div>
+        </div>
+
+        <div class="main-section">
+            <div class="user-welcome">
+                <h2>Welcome to NexGen Budgets</h2>
+                <p>Your personal finance management dashboard</p>
+            </div>
+
+            <div class="dashboard-card">
+                <h3>Personal Information</h3>
+                <div class="profile-details">
+                    <div class="detail-row">
+                        <span class="detail-label">Full Name:</span>
+                        <span class="detail-value">{{ user.full_name }}</span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="detail-label">Email:</span>
+                        <span class="detail-value">{{ user.email }}</span>
+                    </div>
+                    {% if user.business_name %}
+                    <div class="detail-row">
+                        <span class="detail-label">Business:</span>
+                        <span class="detail-value">{{ user.business_name }}</span>
+                    </div>
+                    {% endif %}
+                    {% if user.phone %}
+                    <div class="detail-row">
+                        <span class="detail-label">Phone:</span>
+                        <span class="detail-value">{{ user.phone }}</span>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="dashboard-card">
+                <h3>Recent Login Activity</h3>
+                {% if login_history %}
+                <table class="login-history-table">
+                    <thead>
+                        <tr>
+                            <th>Time</th>
+                            <th>Status</th>
+                            <th>IP Address</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for attempt in login_history %}
+                        <tr>
+                            <td>{{ attempt.attempt_time.strftime('%Y-%m-%d %H:%M') }}</td>
+                            <td>
+                                <span class="status-badge {{ attempt.status }}">{{ attempt.status }}</span>
+                            </td>
+                            <td>{{ attempt.ip_address }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+                {% else %}
+                <p>No recent login activity found</p>
+                {% endif %}
+                <a href="{{ url_for('login_activity') }}" class="view-more-link">View Full History</a>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('User profile initialized');
+        });
+    </script>
+</body>
+</html>

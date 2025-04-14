@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Create Account</title>
+    <link rel="stylesheet" href="/static/css/sign_up.css" />
+    <style>
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            margin-bottom: 12px;
+        }
+        .form-group label {
+            font-family: sans-serif;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        .form-group input,
+        .form-group select {
+            padding: 8px;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+        }
+        .login-container {
+            width: 100%;
+            max-width: 500px;
+            padding: 30px;
+            margin: auto;
+            background: rgba(0, 0, 0, 0.4);
+            border-radius: 20px;
+            box-shadow: 0px 4px 15px rgba(0, 0, 0, 0.3);
+            min-height: 600px;
+        }
+        .password-feedback {
+            font-size: 0.8rem;
+            margin-top: 5px;
+        }
+        .weak { color: red; }
+        .medium { color: orange; }
+        .strong { color: green; }
+    </style>
+</head>
+<body>
+
+    <!-- Flash Messages -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+        <div class="floating-alert">
+            <div class="alert-bubble">
+                {% for category, message in messages %}
+                <div class="alert-message {{ category }}">
+                    {{ message }}
+                    <span class="alert-close">&times;</span>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+    {% endwith %}
+
+    <video autoplay muted loop class="video-background">
+        <source src="/static/login_anim_videos/7.mp4" type="video/mp4" />
+        Your browser does not support the video tag.
+    </video>
+
+    <div class="login-container">
+        <h1 class="Nexgen">NEXGEN BUDGETS</h1>
+        <h2>Create Account</h2>
+        <form id="signupForm" method="POST" action="/signup">
+            <div class="form-group">
+                <label for="full_name">Full Name</label>
+                <input type="text" id="full_name" name="full_name" placeholder="Enter your full name" required />
+            </div>
+            <div class="form-group">
+                <label for="email">Email ID</label>
+                <input type="email" id="email" name="email" placeholder="Enter your email" required />
+            </div>
+            <div class="form-group">
+                <label for="phone">Phone Number</label>
+                <input type="tel" id="phone" name="phone" placeholder="Enter your phone number" pattern="[0-9]+" required />
+            </div>
+            <div class="form-group">
+                <label for="business_name">Business Name</label>
+                <input type="text" id="business_name" name="business_name" placeholder="Enter your business name" required />
+            </div>
+            <div class="form-group">
+                <label for="password">Password</label>
+                <input type="password" id="password" name="password" 
+                       placeholder="Min 8 characters with 1 number & 1 special character" required />
+                <div id="password-strength" class="password-feedback"></div>
+            </div>
+            <div class="form-group">
+                <label for="re_password">Re-Enter Password</label>
+                <input type="password" id="re_password" name="re_password" 
+                       placeholder="Re-enter your password" required />
+                <div id="password-error" class="password-feedback" style="color: red;"></div>
+            </div>
+            <div class="form-group">
+                <label for="dob">Date of Birth</label>
+                <input type="date" id="dob" name="dob" required />
+            </div>
+            <div class="form-group">
+                <label for="country">Country</label>
+                <select id="country" name="country" required>
+                    <option value="">Select Country</option>
+                    <option value="India">India</option>
+                    <option value="USA">USA</option>
+                    <option value="UK">UK</option>
+                    <option value="Australia">Australia</option>
+                    <option value="Canada">Canada</option>
+                    <option value="Germany">Germany</option>
+                    <option value="France">France</option>
+                    <option value="Japan">Japan</option>
+                    <option value="Brazil">Brazil</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="state">State</label>
+                <select id="state" name="state" required>
+                    <option value="">Select State</option>
+                </select>
+            </div>
+            <button type="submit" class="login-btn">Submit</button>
+        </form>
+        <div class="links">
+            <p>Already a NEXGEN BUDGET user?</p>
+            <a href="{{ url_for('login') }}">Login</a>
+        </div>
+    </div>
+    
+    <script>
+        // Password validation
+        function validatePassword() {
+            const password = document.getElementById("password").value;
+            const rePassword = document.getElementById("re_password").value;
+            const errorElement = document.getElementById("password-error");
+            
+            // Clear previous errors
+            errorElement.textContent = "";
+            
+            // Check password requirements
+            const hasMinLength = password.length >= 8;
+            const hasNumber = /\d/.test(password);
+            const hasSpecialChar = /[!@#$%^&*(),.?":{}|<>]/.test(password);
+            
+            if (!hasMinLength || !hasNumber || !hasSpecialChar) {
+                errorElement.textContent = "Password must be at least 8 characters with 1 number and 1 special character";
+                return false;
+            }
+            
+            if (password !== rePassword) {
+                errorElement.textContent = "Passwords do not match";
+                return false;
+            }
+            
+            return true;
+        }
+
+        // Add validation on form submission
+        document.getElementById("signupForm").addEventListener("submit", function(event) {
+            if (!validatePassword()) {
+                event.preventDefault();
+            }
+        });
+
+        // Add live feedback
+        document.getElementById("password").addEventListener("input", function() {
+            const password = this.value;
+            const strengthText = document.getElementById("password-strength");
+            
+            if (password.length === 0) {
+                strengthText.textContent = "";
+                strengthText.className = "password-feedback";
+                return;
+            }
+            
+            if (password.length < 8) {
+                strengthText.textContent = "Weak (minimum 8 characters)";
+                strengthText.className = "password-feedback weak";
+            } else if (!/\d/.test(password) || !/[!@#$%^&*(),.?":{}|<>]/.test(password)) {
+                strengthText.textContent = "Medium (needs number & special character)";
+                strengthText.className = "password-feedback medium";
+            } else {
+                strengthText.textContent = "Strong password!";
+                strengthText.className = "password-feedback strong";
+            }
+        });
+
+        // Country-State Dropdown Logic
+        const countrySelect = document.getElementById("country");
+        const stateSelect = document.getElementById("state");
+
+        const stateOptions = {
+            India: ["Tamil Nadu", "Maharashtra", "Karnataka", "Kerala", "Delhi"],
+            USA: ["California", "New York", "Texas", "Florida"],
+            UK: ["England", "Scotland"],
+            Australia: ["New South Wales", "Victoria"],
+            Canada: ["Ontario", "Quebec"],
+            Germany: ["Bavaria", "Berlin"],
+            France: ["Île-de-France", "Provence-Alpes-Côte d'Azur"],
+            Japan: ["Tokyo", "Osaka"],
+            Brazil: ["São Paulo", "Rio de Janeiro"]
+        };
+
+        countrySelect.addEventListener("change", function() {
+            const selectedCountry = countrySelect.value;
+            stateSelect.innerHTML = '<option value="">Select State</option>';
+
+            if (stateOptions[selectedCountry]) {
+                stateOptions[selectedCountry].forEach(state => {
+                    const option = document.createElement("option");
+                    option.value = state;
+                    option.textContent = state;
+                    stateSelect.appendChild(option);
+                });
+            }
+        });
+
+        // Alert handling
+        document.addEventListener('DOMContentLoaded', () => {
+            const alerts = document.querySelectorAll('.alert-message');
+            
+            alerts.forEach(alert => {
+                // Close button
+                alert.querySelector('.alert-close').addEventListener('click', () => {
+                    alert.classList.add('hiding');
+                    setTimeout(() => alert.remove(), 300);
+                });
+                
+                // Auto-hide after 5 seconds
+                setTimeout(() => {
+                    alert.classList.add('hiding');
+                    setTimeout(() => alert.remove(), 300);
+                }, 5000);
+            });
+        });
+    </script>
+</body>
+</html>

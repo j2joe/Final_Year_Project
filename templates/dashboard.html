@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - Nexgen Budgets</title>
+    <link rel="stylesheet" href="/static/css/dashboard.css">
+    <script src="/static/js/dashboard.js" defer></script>
+    <style>
+        .modal-content {
+            max-height: 90vh;
+            overflow-y: auto;
+            padding: 25px;
+        }
+        
+        .modal-form {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+        
+        .form-group {
+            margin-bottom: 15px;
+        }
+        
+        @media (max-height: 700px) {
+            .modal-content {
+                max-height: 85vh;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .modal-content {
+                width: 95%;
+                max-height: 90vh;
+            }
+        }
+        
+        .error-message {
+            color: #e74c3c;
+            font-size: 0.8em;
+            display: block;
+            margin-top: 5px;
+        }
+        
+        .spinner {
+            display: inline-block;
+            margin-left: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="sidebar">
+        <div class="brand-box">
+            <img alt="Nexgen Budgets Logo" class="logo" src="/static/images/logo.jpg"/>
+        </div>
+        <div class="menu">
+            <div class="menu-item active">
+                <a href="{{ url_for('dashboard') }}">
+                    <img src="/static/icon/home.png" alt="Dashboard"> Dashboard
+                </a> 
+            </div>
+            <div class="menu-item">
+                <a href="#">
+                    <img src="/static/icon/expense.png" alt="View Expenses"> View Expenses
+                </a>
+            </div>
+            <div class="menu-item">
+                <a href="#">
+                    <img src="/static/icon/fetch.png" alt="Fetch Statements"> Fetch Statements
+                </a>
+            </div>
+            <div class="menu-item">
+                <a href="#">
+                    <img src="/static/icon/summary.png" alt="Summary"> Summary
+                </a>
+            </div>
+            <div class="menu-item">
+                <a href="#">
+                    <img src="/static/icon/report.png" alt="Report & Analysis"> Report & Analysis
+                </a>
+            </div>
+            <div class="menu-item">
+                <a href="#">
+                    <img src="/static/icon/quotation.png" alt="Quotation"> Quotation
+                </a>
+            </div>
+            <div class="menu-item">
+                <a href="{{ url_for('login_activity') }}">
+                    <img src="/static/icon/Login_activity.png" alt="Login Activity"> Login Activity
+                </a>
+            </div>
+        </div>
+        <div class="menu-item">
+            <a href="{{ url_for('logout') }}" class="logout-btn">
+                <img src="/static/icon/logout.png" alt="Logout"> Logout
+            </a>
+        </div>
+    </div>
+    <div class="content">
+        <div class="top-bar">
+            <div>
+                <a href="{{ url_for('dashboard') }}" class="home-link">
+                    <img src="/static/icon/home.png" alt="Home" class="home-icon"> Home
+                </a>
+            </div>
+            <div class="search-bar">
+                <input type="text" placeholder="Search transactions...">
+            </div>
+            <div class="user-info">
+                <a href="{{ url_for('user_profile') }}" class="settings-icon">
+                    <img src="/static/icon/user.png" alt="User Profile"> My Profile
+                </a>
+            </div>
+        </div>
+
+        <div id="notification-area"></div>
+
+        <div class="main-section">
+            <div class="dashboard-card">
+                <h3>Quick Actions</h3>
+                <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 15px;">
+                    <button id="addIncomeBtn" class="button" style="background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);">Add Income</button>
+                    <button id="addExpenseBtn" class="button" style="background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);">Add Expense</button>
+                    <button id="generateReportBtn" class="button" style="background: linear-gradient(135deg, #2ecc71 0%, #27ae60 100%);">Generate Report</button>
+                </div>
+            </div>
+
+            <div class="dashboard-card">
+                <h2>Financial Overview</h2>
+                <p>Your current financial summary will appear here</p>
+                <div style="height: 200px; background: #f8f9fa; border-radius: 8px; display: flex; align-items: center; justify-content: center; color: #7f8c8d;">
+                    Financial Charts Coming Soon
+                </div>
+            </div>
+
+            <div class="dashboard-card">
+                <h2>Recent Transactions</h2>
+                <div id="transactions-container">
+                    <p>Loading transactions...</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add Income Modal -->
+    <div id="incomeModal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2>Add Income</h2>
+            <form id="incomeForm">
+                <div class="form-group">
+                    <label for="incomeAmount">Amount</label>
+                    <input type="number" step="0.01" id="incomeAmount" required min="0.01">
+                    <small class="error-message" id="incomeAmountError"></small>
+                </div>
+                <div class="form-group">
+                    <label for="incomeCategory">Category</label>
+                    <select id="incomeCategory" required>
+                        <option value="">Select category</option>
+                    </select>
+                    <small class="error-message" id="incomeCategoryError"></small>
+                </div>
+                <div class="form-group">
+                    <label for="incomeDate">Date</label>
+                    <input type="date" id="incomeDate" required>
+                    <small class="error-message" id="incomeDateError"></small>
+                </div>
+                <div class="form-group">
+                    <label for="incomeDescription">Description</label>
+                    <input type="text" id="incomeDescription">
+                </div>
+                <button type="submit" class="submit-btn">
+                    <span id="incomeSubmitText">Add Income</span>
+                    <span id="incomeSpinner" class="spinner" style="display: none;">Processing...</span>
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Add Expense Modal -->
+    <div id="expenseModal" class="modal">
+        <div class="modal-content" style="max-width: 500px;">
+            <span class="close">&times;</span>
+            <h2>Add Expense</h2>
+            <form id="expenseForm" class="modal-form">
+                <div class="form-group">
+                    <label for="expenseAmount">Amount*</label>
+                    <input type="number" step="0.01" id="expenseAmount" required min="0.01">
+                    <small class="error-message" id="expenseAmountError"></small>
+                </div>
+                <div class="form-group">
+                    <label for="expenseCategory">Category*</label>
+                    <select id="expenseCategory" required>
+                        <option value="">Select category</option>
+                    </select>
+                    <small class="error-message" id="expenseCategoryError"></small>
+                </div>
+                <div class="form-group">
+                    <label for="expenseDate">Date*</label>
+                    <input type="date" id="expenseDate" required>
+                    <small class="error-message" id="expenseDateError"></small>
+                </div>
+                <div class="form-group">
+                    <label for="expenseDescription">Description</label>
+                    <input type="text" id="expenseDescription">
+                </div>
+                <div class="form-group">
+                    <label for="expensePayment">Payment Method</label>
+                    <select id="expensePayment">
+                        <option value="CASH">Cash</option>
+                        <option value="CREDIT_CARD">Credit Card</option>
+                        <option value="BANK_TRANSFER">Bank Transfer</option>
+                        <option value="OTHER">Other</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>
+                        <input type="checkbox" id="expenseRecurring"> Recurring Expense
+                    </label>
+                </div>
+                <button type="submit" class="submit-btn">
+                    <span id="expenseSubmitText">Add Expense</span>
+                    <span id="expenseSpinner" class="spinner" style="display: none;">Processing...</span>
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Report Generation Modal -->
+    <div id="reportModal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2>Generate Report</h2>
+            <form id="reportForm">
+                <div class="form-group">
+                    <label for="reportType">Report Type</label>
+                    <select id="reportType" required>
+                        <option value="">Select report type</option>
+                        <option value="monthly_summary">Monthly Summary</option>
+                        <option value="category_breakdown">Category Breakdown</option>
+                        <option value="income_vs_expense">Income vs Expense</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="startDate">Start Date</label>
+                    <input type="date" id="startDate" required>
+                </div>
+                <div class="form-group">
+                    <label for="endDate">End Date</label>
+                    <input type="date" id="endDate" required>
+                </div>
+                <div class="form-group">
+                    <label for="reportFormat">Format</label>
+                    <select id="reportFormat">
+                        <option value="html">Web View</option>
+                        <option value="pdf">PDF</option>
+                        <option value="csv">CSV</option>
+                    </select>
+                </div>
+                <button type="submit" class="submit-btn">
+                    <span id="reportSubmitText">Generate Report</span>
+                    <span id="reportSpinner" class="spinner" style="display: none;">Generating...</span>
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Loading Overlay -->
+    <div id="loadingOverlay" style="display: none;">
+        <div class="spinner"></div>
+    </div>
+</body>
+</html>

@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - Nexgen Budgets</title>
+    <link rel="stylesheet" href="/static/css/dashboard.css">
+</head>
+<body>
+    <div class="sidebar">
+        <div class="brand-box">
+            <img alt="Nexgen Budgets Logo" class="logo" src="/static/images/logo.jpg">
+        </div>
+        <div class="menu">
+            <div class="menu-item active"><a href="{{ url_for('dashboard') }}"><img src="/static/icon/home.png" alt="Dashboard"> Dashboard</a></div>
+            <div class="menu-item"><a href="#"><img src="/static/icon/expense.png" alt="View Expenses"> View Expenses</a></div>
+            <div class="menu-item"><a href="#"><img src="/static/icon/fetch.png" alt="Fetch Statements"> Fetch Statements</a></div>
+            <div class="menu-item"><a href="#"><img src="/static/icon/summary.png" alt="Summary"> Summary</a></div>
+            <div class="menu-item"><a href="#"><img src="/static/icon/report.png" alt="Report & Analysis"> Report & Analysis</a></div>
+            <div class="menu-item"><a href="#"><img src="/static/icon/quotation.png" alt="Quotation"> Quotation</a></div>
+            <div class="menu-item"><a href="{{ url_for('login_activity') }}"><img src="/static/icon/Login_activity.png" alt="Login Activity"> Login Activity</a></div>
+        </div>
+        <div class="menu-item">
+           <a href="{{ url_for('logout') }}" class="logout-btn">
+                <img src="/static/icon/logout.png" alt="Logout"> Logout
+            </a>
+        </div>
+    </div>
+    <div class="content">
+        <div class="top-bar">
+            <div><a href="#" class="home-link"><img src="/static/icon/home.png" alt="Home" class="home-icon"> Home</a></div>
+            <div class="search-bar">
+                <input type="text" placeholder="Search">
+            </div>
+            <div class="user-info">
+                <a href="#" class="settings-icon"><img src="/static/icon/settings.png" alt="Settings"></a> | <a href="#"><img src="/static/icon/user.png" alt="User Profile"> User Profile</a>
+            </div>
+        </div>
+
+        <div class="main-section">
+            <h2>Current Work Orders</h2>
+            <div class="work-order-actions">
+        <a href="{{ url_for('create_work_order') }}" class="button">+ New Work Order</a>    </div>
+       
+        {% if orders %}
+        <table class="work-order-table">
+            <thead>
+                <tr>
+                    <th>Title</th>
+                    <th>Client</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for order in orders %}
+                <tr>
+                    <td>{{ order.title }}</td>
+                    <td>{{ order.client_name or 'N/A' }}</td>
+                    <td><span class="status-badge {{ order.status }}">{{ order.status }}</span></td>
+                    <td>
+                        <a href="{{ url_for('view_work_order', order_id=order.id) }}" 
+                           class="action-link">View</a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+        <p>No work orders found. Create your first work order!</p>
+        {% endif %}
+    </div>
+</div>
+</body>
+</html>
